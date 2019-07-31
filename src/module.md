@@ -100,8 +100,7 @@ ES6的Module功能主要由两个命令组成 `export`、`import`,`export`用于
 ```
     import { reallyReallyLongModuleExportName as shortName } from '/modules/my-module.js' // 单个
 
-    import { reallyReallyLongModuleMemberName as shortName, 
-  anotherLongModuleName as short } from '/modules/my-module.js' // 多个
+    import { reallyReallyLongModuleMemberName as shortName, anotherLongModuleName as short } from '/modules/my-module.js' // 多个
 ```
 
 ###### 导入整个模块的内容
