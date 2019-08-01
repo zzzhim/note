@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-07-31 20:55:21
- * @LastEditTime: 2019-07-31 21:49:00
+ * @LastEditTime: 2019-08-01 10:21:10
  * @LastEditors: Please set LastEditors
  -->
 - [首页](README.md)
@@ -12,3 +12,4 @@
 
 - js设计模式
     - [模块模式](src/module.md)
+    - [链模式](src/chain.md)
