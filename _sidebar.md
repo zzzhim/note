@@ -13,3 +13,4 @@
 - js设计模式
     - [模块模式](src/module.md)
     - [链模式](src/chain.md)
+    - [MVC、MVP、MVVM](src/mvc、mvp、mvvm.md)
