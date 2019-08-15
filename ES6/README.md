@@ -7,5 +7,5 @@
  -->
 
 ### 参考文章
-<!-- - [JavaScript 设计模式精讲](https://www.imooc.com/read/38#catalog)
-- [MDN](https://developer.mozilla.org/zh-CN/) -->
+- [Understanding ECMAScript 6](https://leanpub.com/understandinges6/read)
+- [Understanding ECMAScript 6 中文翻译](https://legacy.gitbook.com/book/sagittarius-rev/understanding-ecmascript-6-zh-ver/details)
