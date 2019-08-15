@@ -6,13 +6,6 @@
  * @LastEditors: Please set LastEditors
  -->
 
-# 目录结构
-
-```text
-    ---- src
-        ---- pattern js 设计模式
-```
-
 ### 参考文章
 - [JavaScript 设计模式精讲](https://www.imooc.com/read/38#catalog)
 - [MDN](https://developer.mozilla.org/zh-CN/)

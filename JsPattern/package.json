@@ -1,0 +1,22 @@
+{
+    "name": "note",
+    "description": "<!--\r  * @Description: In User Settings Edit\r  * @Author: your name\r  * @Date: 2019-07-31 01:03:55\r  * @LastEditTime: 2019-07-31 10:39:41\r  * @LastEditors: Please set LastEditors\r  -->",
+    "version": "1.0.0",
+    "main": "index.js",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/zzzhim/note.git"
+    },
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/zzzhim/note/issues"
+    },
+    "homepage": "https://github.com/zzzhim/note#readme",
+    "scripts": {
+        "serve": "docsify serve ../JsPattern"
+    },
+    "dependencies": {
+        "docsify-cli": "^4.3.0"
+    }
+}
