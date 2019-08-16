@@ -8,5 +8,6 @@
 
 - ECMAScript 6
     - [块级绑定](/block.md)
+    - [字符串与正则表达式](/stringAndRegExp.md)
 
 - [参考文章](README.md)
