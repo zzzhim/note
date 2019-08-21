@@ -10,5 +10,6 @@
     - [块级绑定](/block.md)
     - [字符串与正则表达式](/stringAndRegExp.md)
     - [函数](/fun.md)
+    - [扩展的对象功能](/expansionObject.md)
 
 - [参考文章](README.md)
