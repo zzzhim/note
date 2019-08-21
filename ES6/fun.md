@@ -263,3 +263,151 @@ ES6中给所有的函数都添加了自己的 `name` 属性值。
 !> `getter` 和 `setter` 函数都必须要用 `Object.getOwnPropertyDescriptor()` 来检索。
 
 ### 明确函数双重作用
+在ES5以及更早版本中，函数根据是否使用 `new` 来调用而有双重用途。当使用 `new` 时，函数内部的 `this` 是一个新对象，并作为函数的返回值。
+
+JS为函数提供了两个不同的内部方法： `[[Call]]` 与 `[[Construct]]` 。当函数未使用 `new` 来进行调用时， `[[Call]]` 方法会被执行，运行的是代码中显示的函数体。而当函数使用 `new` 进行调用时， `[[Construct]]` 方法则会被执行，负责创建一个被称为新目标的新的对象，并且使用该新目标作为 `this` 去执行函数体。拥有 `[[Construct]]` 方法的函数被称为构造器。
+
+!> 并不是所有函数都拥有 `[[Construct]]` 方法，因此不是所有函数都可以使用 `new` 来调用。在 **箭头函数**中，**箭头函数**就未拥有该方法。
+
+### new.target 元属性
+ES6 引入了 `new.target` 元属性。元属性指的是“非对象”（例如 `new` ）上的一个属性，并提供关联到它的目标的附加信息。当函数的 `[[Construct]]` 方法被调用时， `new.target` 会被填入 `new` 运算符的作用目标，该目标通常是新创建的对象实例的构造器，并且会成为函数体内部的 `this` 值。而若 `[[Call]]` 被执行， `new.target` 的值则会是 `undefined`。
+
+我们可以通过检查 `new.target` 是否被定义，这个新的元属性就让你能安全地判断函数是否被使用 `new` 进行了调用。
+```js
+    function Person(name) {
+        if(typeof new.target !== 'undefined') {
+            this.name = name
+        }else {
+            throw new Error("You must use new with Person.")
+        }
+    }
+
+    const person = new Person('奶糖')
+    const notAPrson = Person.call(person, '奶糖') // 报错
+```
+
+使用 `new.target`, `Person` 构造器会在未使用 `new` 调用时抛出错误。
+
+我们也可以检查 `new.target` 是否被使用特定构造器进行了调用。
+```js
+    function Person(name) {
+        if(new.target !== Person) {
+            this.name = name
+        }else {
+            throw new Error("You must use new with Person.")
+        }
+    }
+
+    function AnotherPerson(name) {
+        Person.call(this, name)
+    }
+
+    const person = new Person("奶糖")
+    const anotherPerson = new AnotherPerson("奶糖") // 报错
+```
+
+### 箭头函数
+箭头函数正如名称所示那样使用一个“箭头”（`=>`）来定义，但它的行为在很多重要方面与传统的JS函数不同。
+- 没有 `this`、`super`、`arguments`，也没有 `new.target` 绑定：`this`、`super`、`arguments`、以及函数内部的 `new.target`的值的所在由最靠近的非箭头函数来决定。
+- 不能被使用 `new` 调用：箭头函数没有 `[[Construct]]` 方法，因此不能被用为构造函数，使用 `new` 调用箭头函数会抛出错误。
+- 没有原型：既然不能对箭头函数使用 `new` ，那么它也不需要原型，也就是没有 `prototype` 属性。
+- 不能更改 `this`： `this` 的值在函数内部不能被修改，在函数的整个生命周期内其值会保持不变。
+- 没有 `arguments` 对象：既然箭头函数没有 `arguments` 绑定，我们必须依赖于具名参数或剩余参数来访问函数的参数。
+- 不允许重复的具名参数：箭头函数不允许拥有拥有重复的具名参数，无论是否在严格模式下；而相对来说，传统函数只有在严格模式下才禁止这种重复。
+
+###### 箭头函数语法
+当接受单个参数时。
+```js
+    const fun = value => value
+    
+    // 等价于
+    const fun = function(value) {
+        return value
+    }
+```
+
+当传递多个参数的时候
+```js
+    const fun = (num1, num2) => num1 + num2
+    
+    // 等价于
+    const fun = function(num1, num2) {
+        return num1 + num2
+    }
+```
+
+当包含多个语句的时候，我们需要将函数体用一对花括号进行包裹，并明确定义一个返回值。
+```js
+    const fun = (num1, num2) => {
+        const num = num1 + num2
+        return num
+    }
+
+    // 等价于
+    const fun = function(num1, num2) {
+        const num = num1 + num2
+        return num
+    }
+```
+
+###### 创建立即调用函数表达式
+JS 中使用函数的一种流行方式是创建立即调用函数表达式（ immediately-invoked function
+expression ， IIFE ）。 IIFE 允许你定义一个匿名函数并在未保存引用的情况下立刻调用它。
+
+在ES5以及更早的版本中你可能会见到这种写法。
+```js
+    (function(name) {
+        return '我的名字是' + name
+    }('zzzhim'))
+
+    // 或者
+
+    !function(name) {
+        return '我的名字是' + name
+    }('zzzhim')
+```
+
+?> 上面代码中当程序执行到上面的函数时，函数将会自执行并且返回一个字符串。
+
+我们可以使用箭头函数来完成同样的效果
+```js
+    (name => '我的名字是' + name)('zzzhim')
+```
+
+?> 通过上面的代码我们可以看到使用箭头函数，我们可以达到同样的目的，并且代码更加简洁形象
+
+| 使用传统函数时， (function(){/*函数体*/})() 与 (function(){/*函数体*/}())
+这两种方式都是可行的。
+
+| 但若使用箭头函数，则只有下面的写法是有效的： (() => {/*函数体*/})()
+
+### 尾调用优化
+在ES6中函数最有趣的改动或许就是一项引擎优化，它改变了尾部调用的系统。尾调用（`this call`）指的是调用函数的语句是另一个函数的最后语句。如下：
+```js
+    function doSomething() {
+        return doSomethingElse(); // 尾调用
+    }
+```
+
+ES6 在严格模式下力图为特定尾调用减少调用栈的大小（非严格模式的尾调用则保持不变）。当满足以下条件时，尾调用优化会清除当前栈帧并再次利用它，而不是为尾调用创建新的栈帧：
+1. 尾调用不能引用当前栈帧中的变量（意味着该函数不能是闭包）；
+2. 进行尾调用的函数在尾调用返回结果后不能做额外操作；
+3. 尾调用的结果作为当前函数的返回值。
+
+### 总结
+在特定参数被传入时，函数的默认参数允许我们更容易指定需要使用的值。而在ES6之前，这要求我们在函数内使用一些额外的代码检测才能实现默认参数。
+
+剩余参数允许我们将余下的所有参数放入指定数组。使用真正的数组并让我们指定哪些参数需要被包含，使得剩余参数成为比 `arguments` 更为灵活的解决方案。
+
+扩展运算符是剩余参数的好伙伴，允许我们在调用函数时将数组解构为分离的参数。在ES6之前我们想把数组的元素作为独立参数传给函数，只能有两种办法：手动指定或者使用 `apply()` 方法。
+
+新增的 `name` 属性能帮我们在调试与执行方面更容易识别函数。
+
+在ES6中，函数的行为被 `[[Call]]` 与 `[[Construct]]` 方法所定义，前者对应普通的函数执行，后者则对应使用了 `new` 的调用。 我们可以使用 `new.target` 元属性来判断函数被调用时是否使用了 `new` 。
+
+ES6 函数的最大变化就是增加了箭头函数。箭头函数被设计用于替代匿名函数表达式，它拥
+有更简洁的语法、词法级的 this 绑定，并且没有 arguments 对象。此外，箭头函数不能修
+改它们的 this 绑定，因此不能被用作构造器。
+
+尾调用优化允许某些函数的调用被优化，以保持更小的调用栈、使用更少的内存，并防止堆
+栈溢出。当能进行安全优化时，它会由引擎自动应用。
