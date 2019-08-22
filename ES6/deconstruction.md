@@ -125,3 +125,66 @@
     const { name: { englishName = "zzzhim", chineseName: localName } } = person
     console.log(englishName, localName) // zzzhim, 反芹菜联盟盟主
 ```
+
+### 数组解构
+数组解构的语法和对象解构差不多，只是对象字面量（`{}`）替换成了数组字面量（`[]`）。数组结构时，解构是根据数组内部的位置，而不是像对象一样根据对象上的具名属性进行结构。如下：
+```js
+    const nums = [ 1, 2, 3 ]
+
+    const [ one, two, three ] = nums
+
+    console.log(one)    // 1
+    console.log(two)    // 2
+    console.log(three)  // 3
+```
+
+上面的数组解构从 `nums` 数组中取出了 `1`, `2`, `3`，并将它们赋值给 `one`、`two`、`three`变量。这些值被赋值，是根据它们在数组中的位置进行的，而不是根据变量名称。
+
+当我们只想要取出 `nums` 中第三个值时，我们也可以在数组解构中忽略某一些值。如下：
+```js
+    const nums = [ 1, 2, 3 ]
+
+    const [ , , three ] = nums
+
+    console.log(three)  // 3
+```
+
+!> 与对象解构一样，我们在使用 `var`、`let`、`const` 进行数组解构的时候，也需要提供初始化器。
+
+同样我们也可以在赋值表达式中使用数组解构。如下：
+```js
+    let one, two, three
+    const nums = [ 1, 2, 3 ]
+
+    ;[ one, two, three ] = nums
+
+    console.log(one)    // 1
+    console.log(two)    // 2
+    console.log(three)  // 3
+```
+
+?> 赋值表达式中数组解构与对象结构的区别是，在数组表达式中不必将表达式包含在圆括号（`()`）中。
+
+数组解构中，有一个很实用的例子，可以轻易地互换两个变量的值。如下：
+```js
+    let a = 1,
+        b = 2
+
+    ;[ a, b ] = [ b, a ]
+
+    console.log(a, b) // 2, 1
+```
+
+### 默认值
+数组解构赋值也支持默认值，当数组指定位置项不存在，或者值为 `undefined`时，那么就会应用默认值。如下：
+```js
+    const nums = [ 1, undefined ]
+
+    const [ one, two = 2, three = 3 ] = nums
+
+    console.log(one)    // 1
+    console.log(two)    // 2
+    console.log(three)  // 3
+```
+
+### 嵌套的解构
