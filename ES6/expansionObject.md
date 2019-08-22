@@ -158,3 +158,144 @@ ES6 在 `Object` 对象上引入了两个新方法，`Object.is()` 和 `Object.a
 ```
 
 ?> 在许多情况下 `Object.is()` 的结果与**严格相等运算符**是相同的，仅有的例外是： 它会认为  `+0` 和 `-0` 不相等，而且 `NaN` 等于 `NaN`。
+
+###### Object.assign() 方法
+Object.assign() 方法用于将所有可枚举属性的值从一个或多个源对象复制到目标对象。它将返回目标对象。
+
+**Object.assign()** 方法只会拷贝源对象自身的并且可枚举的属性到目标对象。如果目标对象中的属性具有相同的键，则属性将被源对象中的属性覆盖。后面的源对象的属性将类似地覆盖前面的源对象的属性。
+```js
+    const target = {
+        a: 1,
+        b: 2
+    }
+
+    const source = {
+        b: 3,
+        c: 4
+    }
+
+    const copy = Object.assign(target, source)
+    console.log(copy)
+```
+
+需要注意的是 `Object.assign()` 进行的是浅拷贝，拷贝的是属性值。假如源对象的值是一个对象的引用，那么它也只指向那个引用。如下：
+```js
+    const target = {
+        a: 1,
+        b: 2
+    }
+
+    const source = {
+        b: 3,
+        c: {
+            a: 1
+        }
+    }
+
+    const copy = Object.assign(target, source)
+    console.log(copy)   // { a: 1, b: 3, c: { a: 1 } }
+
+    source.c.a = 2
+
+    console.log(source) // { a: 1, b: 3, c: { a: 2 } }
+    console.log(copy)   // { a: 1, b: 3, c: { a: 2 } }
+```
+
+?> 如果我们需要进行深拷贝可以使用 `JSON` 进行深拷贝，这也是目前很常见的一种深拷贝方式。
+
+
+### 修改对象的原型
+一般来说，对象的原型会在通过构造器或者 `Object.create()` 方法创建该对象时被指定。**ES6** 通过添加了 `Object.setPrototypeOf()` 方法，允许我们修改任意对象的原型。
+
+`Object.setPrototypeOf()` 接受两个参数：第一个参数是要设置原型的对象，第二个参数是该对象的新原型（`Object` 或者 `null`）。
+```js
+    const person = {
+        getGreeting() {
+            return "Hello"
+        }
+    }
+
+    const dog = {
+        getGreeting() {
+            return "Woof"
+        }
+    }
+
+    const friend = Object.create(person)
+
+    console.log(friend.getGreeting()) // Hello
+    console.log(Object.getPrototypeOf(friend) === person) // true
+
+    Object.setPrototypeOf(friend, dog)
+
+    console.log(friend.getGreeting()) // Woof
+    console.log(Object.getPrototypeOf(friend) === person) // false
+    console.log(Object.getPrototypeOf(friend) === dog) // true
+```
+
+通过上面的例子我们可以看到，通过 `Object.getPrototypeOf()` 我们可以把一个对象的原型指向另外一个对象。
+
+?> 对象原型的实际值被存储在一个内部属性 `[[Prototype]]` 上， `Object.getPrototypeOf()` 方法会返回此属性存储的值，而 `Object.setPrototypeOf()` 方法则能够修改该值。不过，使用`[[Prototype]]` 属性的方式还不止这些。
+
+### 使用 super 引用的简单原型访问
+**super** 关键字用于访问和调用一个对象的父对象上的函数。**super**是指向当前对象的原型的一个指针，实际上就是 `Object.getPrototypeOf()` 的值。
+```js
+    const obj1 = {
+        method() {
+            console.log("obj1")
+        }
+    }
+
+    const obj2 = {
+        method() {
+            Object.getPrototypeOf(this).method()
+        }
+    }
+
+    Object.setPrototypeOf(obj2, obj1)
+    obj2.method() // obj1
+
+    const obj3 = {
+        method() {
+            console.log("obj3")
+        }
+    }
+
+    Object.setPrototypeOf(obj2, obj3)
+    obj2.method() // obj3
+```
+
+### 正式的方法定义
+在**ES6**之前，“方法”的概念从未被正式定义，它此前仅指对象的函数属性（而非数据属性）。ES6则正式做出了定义：方法是一个拥有`[[HomeObject]]`内部属性的函数，此内部属性指向该方法所属的对象。
+```js
+    const person = {
+        // 方法
+        getGreeting() {
+            return "Hello"
+        }
+    }
+
+    // 并非方法
+    function shareGreeting() {
+        return "Hi!"
+    }
+```
+
+此例定义了拥有单个 `getGreeting()` 方法的 `person` 对象。由于 `getGreeting()` 被直接赋给了一个对象，它的 `[[HomeObject]]` 属性值就是 `person` 。 而另一方面， `shareGreeting()`函数没有被指定 `[[HomeObject]]` 属性，因为它在被创建时并没有赋给一个对象。大多数情况下，这种差异并不重要，然而使用 `super` 引用时就完全不同了。
+
+任何对 `super` 的引用都会使用 `[[HomeObject]]` 属性来判断要做什么。第一步是在`[[HomeObject]]` 上调用 `Object.getPrototypeOf()` 来获取对原型的引用；接下来，在该原型上查找同名函数；最后，创建 `this` 绑定并调用该方法。
+
+### 总结
+对象是 `JS` 编程的中心， `ES6` 对它进行了一些有益改进，让它更易用并且更加强大。
+
+`ES6` 为对象字面量做了几个改进。速记法属性定义能够更轻易地将作用域内的变量赋值给对象的同名属性；**需计算属性名**允许你将非字面量的值指定为属性的名称，就像此前在其他场合的用法那样；方法简写让你在对象字面量中定义方法时能省略冒号和 `function` 关键字，从而减少输入的字符数； `ES6` 还舍弃了对象字面量中重复属性名的检查，意味着你可以在一个对象字面量中书写两个同名属性，而不会抛出错误。
+
+`Object.assign()` 方法使得一次性更改单个对象的多个属性变得更加容易，这在你使用混入模
+式时非常有用。 `Object.is()` 方法对任何值都会执行严格相等比较，当在处理特殊的 `JS` 值
+时，它有效成为了 `===` 的一个更安全的替代品。
+
+对象自有属性的枚举顺序在 `ES6` 中被明确定义了。在枚举属性时，数字类型的键总是会首先出现，并按升序排列，此后是字符串类型的键，最后是符号类型的键，后两者都分别按添加顺序排列。
+
+感谢 `ES6` 的 `Object.setPrototypeOf()` 方法，现在能够在对象已被创建之后更改它的原型了。
+
+最后，你能用 `super` 关键字来调用对象原型上的方法，所调用的方法会被设置好其内部的`this` 绑定，以自动使用该 `this` 值来进行工作。
