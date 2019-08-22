@@ -11,5 +11,6 @@
     - [字符串与正则表达式](/stringAndRegExp.md)
     - [函数](/fun.md)
     - [扩展的对象功能](/expansionObject.md)
+    - [解构赋值](/deconstruction.md)
 
 - [参考文章](README.md)
