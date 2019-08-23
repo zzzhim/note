@@ -188,3 +188,224 @@
 ```
 
 ### 嵌套的解构
+同样的数组也支持嵌套的解构，在整个解构模式中插入另一个数组模式，解构操作就会下行到嵌套的数组中。如下：
+```js
+    const nums = [ 1, [ 2, 3 ], 4 ]
+
+    const [ one, [ two, three ], four ] = nums
+
+    console.log(one)    // 1
+    console.log(two)    // 2
+    console.log(three)  // 3
+    console.log(four)   // 4
+```
+
+### 解构一个函数返回的数组
+从一个函数中返回一个数组是十分常见的情况。数组解构，同样也支持解构一个函数返回的数组。
+```js
+    function fun() {
+        return [ 1, 2 ]
+    }
+
+    const [ one, two ] = fun()
+
+    console.log(one)    // 1
+    console.log(two)    // 2
+```
+
+### 剩余项
+与函数的剩余参数相同，数组解构也有个类似的、名为剩余项（rest items）的概念，它使用 `...` 语法来将剩余的项目赋值给一个指定的变量。如下：
+```js
+    const nums = [ 1, 2, 3 ]
+
+    const [ one, ...restNums ] = nums
+
+    console.log(one)         // 1
+    console.log(restNums)    // [ 2, 3 ]
+```
+
+`nums` 的第一项赋值给了变量 `one`, 而它的剩余参数，则以数组的形式以此添加到了 `restNums` 中。
+
+在 `ES5`中我们想要克隆一个数组，可能会用到 `concat()` 方法来克隆数组，而在 `ES6` 中，我们可以使用**剩余参数**的形式，更加方便的达到同样的目的。
+
+ES5中克隆数组：
+```js
+    const nums = [ 1, 2, 3 ]
+
+    const copyNums = nums.concat()
+
+    console.log(copyNums) // [ 1, 2, 3 ]
+```
+
+[concat](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/concat)方法：用于合并两个或多个数组。此方法不会更改现有数组，而是返回一个新数组。
+
+ES6中使用**剩余参数**克隆数组：
+```js
+    const nums = [ 1, 2, 3 ]
+
+    const copyNums = [ ...nums ]
+
+    console.log(copyNums) // [ 1, 2, 3 ]
+```
+
+!> 数组剩余参数，也必须是数组解构模式中的最后部分，之后不能有逗号，否则就是语法错误。
+
+### 解构嵌套对象和数组
+对象与数组解构能被用在一起，以创建更复杂的解构表达式。
+```js
+    const createElement = [
+        'div',
+        {
+            className: 'foo',
+            style: {
+                color: 'red',
+                fontSize: '14px'
+            }
+        },
+        [
+            '这是一段内容!',
+            [
+                'h1',
+                {},
+                '这是一段文本！'
+            ]
+        ]
+    ]
+
+    const [
+        ,
+        {
+            className,
+            style: { color, fontSize }
+        },
+        content
+    ] = createElement
+
+    console.log(className) // foo
+    console.log(color)     // red
+    console.log(fontSize)  // 14px
+    console.log(content)   // [ '这是一段内容!', [ 'h1', {}, '这是一段文本！' ] ]
+```
+
+此代码将 `createElement` 数组中的，`createElement[1]` 对象中的 `className` 与 `style` 下的 `color`、 `fontSize` 和 `createElement[2]` 的值提取了出来。混合使用对象与数组解构，可以把 `createElement` 中的任何部分提取出来。
+
+### 函数参数解构
+解构还有一个特别有用的场景，即在传递函数参数时。
+```js
+    function setCookie(
+        name,
+        value,
+        {
+            secure,
+            path,
+            domain,
+            expires
+        }
+    ) {
+        console.log(secure)  // true
+        console.log(path)    // undefined
+        console.log(domain)  // undefined
+        console.log(expires) // 60000
+
+        // 设置 cookie 的代码
+
+    }
+
+    // 第三个参数映射到 setCookie 的第三个参数上
+    setCookie(
+        "type",
+        "js",
+        {
+            secure: true,
+            expires: 60000
+        }
+    )
+```
+
+上面的代码我们可以看成这样来理解。
+```js
+    function setCookie(name, value, options) {
+        let { secure, path, domain, expires } = options
+
+        console.log(secure)  // true
+        console.log(path)    // undefined
+        console.log(domain)  // undefined
+        console.log(expires) // 60000
+
+        // 设置 cookie 的代码
+
+    }
+
+    // 第三个参数映射到 setCookie 的第三个参数上
+    setCookie(
+        "type",
+        "js",
+        {
+            secure: true,
+            expires: 60000
+        }
+    )
+```
+
+不过上面的代码还有一点小问题，当我们在默认情况下调用函数时，不传递第三个参数的时候，解构赋值会抛出错误。如下：
+```js
+    function setCookie(
+        name,
+        value,
+        {
+            secure,
+            path,
+            domain,
+            expires
+        }
+    ) {
+        console.log(secure)  // true
+        console.log(path)    // undefined
+        console.log(domain)  // undefined
+        console.log(expires) // 60000
+
+        // 设置 cookie 的代码
+    }
+
+    // 抛出错误 Cannot destructure property `secure` of 'undefined' or 'null'.
+    setCookie("type", "js")
+```
+
+这是因为函数调用时，当我们不传递第三个参数时，实际上它会默认等于 `undefined`，这就导致了参数在进行解构时会抛出错误。
+
+想要解决上面的错误，我们可以给函数参数设置一个默认值，当用户不传递或者传递 `undefined` 时，就会应用我们的默认值。如下：
+```js
+    function setCookie(
+        name,
+        value,
+        {
+            secure = true, // 函数参数解构的默认值
+            path = "",
+            domain,
+            expires = 60000
+        } = {}
+    ) {
+        console.log(secure)  // true
+        console.log(path)    // ""
+        console.log(domain)  // undefined
+        console.log(expires) // 60000
+
+        // 设置 cookie 的代码
+    }
+
+    setCookie("type", "js")
+```
+
+这样的话就不会有错误抛出了。
+
+?> 函数参数解构的默认值，只需向上面的例子中，每个参数后面添加等号指定默认值就可以了。
+
+### 总结
+解构使得在 `JS` 中操作对象与数组变得更容易。使用熟悉的对象字面量与数组字面量语法，可以将数据结构分离并只获取你感兴趣的信息。`对象解构模式`允许你从对象中进行提取，而`数组模式`则能用于数组。
+
+`对象`与`数组解构`都能在属性或项未定义时为其提供默认值；在赋值表达式右侧的值为 `null` 或 `undefined` 时，两种模式都会抛出错误。你也可以在深层嵌套的数据结构中使用对象与数组解构，下行到该结构的任意深度。
+
+使用 `var` 、 `let` 或 `const` 的解构声明来创建变量，就必须提供初始化器。解构赋值能替代其他赋值，并且允许你把值解构到对象属性或已存在的变量上。
+
+`参数解构`使用解构语法作为函数的参数，让“选项”（ `options` ）对象更加透明。你实际感兴趣
+的数据可以与具名参数一并列出。解构的参数可以是`对象模式`、`数组模式`或`混合模式`，并且你能使用它们的所有特性。
