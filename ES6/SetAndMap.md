@@ -260,7 +260,212 @@ ES6 新增了 `Set` 类型，这是一种无重复值的有序列表。 `Set` �
 ### ES6 的 Map
 `Map` 对象保存键值对。任何值(对象或者原始值) 都可以作为一个键或一个值。
 
+###### set与get方法
+想要给 `Map` 添加键值可以调用 `set()` 方法；然后可以使用键名来调用 `get()` 方法便能够取得对应的值了。如下：
+```js
+    let map = new Map()
+
+    map.set("title", "ES6")
+    map.set("type", "JS")
+
+    console.log(map.get("title")) // ES6
+    console.log(map.get("type"))  // JS
+```
+
+我们也可以将对象作为键，这也是以前使用对象属性来创建 `Map` 的变通方法所无法做到的。如下：
+```js
+    let map = new Map()
+    const key1 = {}
+    const key2 = {}
+
+    map.set(key1, 1)
+    map.set(key2, 2)
+
+    console.log(map.get(key1)) // 1
+    console.log(map.get(key2)) // 2
+```
+
+在这里我们使用了对象作为 **Map** 的键，并且存储了两个不同的值。由于 **Map** 的键不会被强制转换成其他形式，所以每个对象就都被认为是唯一的。这允许我们给对象关联额外数据，而不用修改对象自身。
+
+### Map 的方法
 与 `Set` 相同，以下三个方法 `Map` 上也存在。
 + `has(key)` ：判断指定的键是否存在于 `Map` 中；
 + `delete(key)` ：移除 `Map` 中的键以及对应的值；
 + `clear()` ：移除 `Map` 中所有的键与值。
+
+**Map** 同样拥有 `size` 属性，用于指明包含了多少键值对。
+
+此示例包含三种方法以及 `size` 属性。
+```js
+    let map = new Map()
+    map.set('a', 1)
+    map.set('b', 2)
+
+    console.log(map.size) // 2
+    console.log(map.has('a')) // true
+
+    map.delete('a')
+
+    // 在 a 键被使用 delete 方法移除后， has() 方法再接受 a 的时候就会返回 false 了
+    console.log(map.has('a')) // false
+    console.log(map.size) // 1
+
+
+    console.log(map.has('b')) // true
+    map.clear()
+
+    console.log(map.size) // 0
+    // 使用 clear 方法则清空了所有的键，所以 has() 方法再接受 b 的时候就会返回 false 了
+    console.log(map.has('b')) // false
+```
+
+### Map 的初始化
+我们也可以将数组传递给 `Map` 构造器，以便使用数据来初始化一个 **Map**。 该数组中的每一项也必须是数组，内部数组的首个项会作为键，第二项则会为对应值。因此整个 **Map** 就被这些双项数组所填充。如下：
+```js
+    const map = new Map([[ 'a', 1 ], [ 'b', 2 ]])
+
+    console.log(map.size) // 2
+
+    console.log(map.has('a')) // true
+    console.log(map.has('b')) // true
+
+    console.log(map.get('a')) // 1
+    console.log(map.get('b')) // 2
+```
+
+### Map 上的 forEach 方法
+**Map** 上也有  `forEach()` 方法类似于 `Set` 与数组的同名方法，它接受一个能接受三个参数的回调函数：
+1. **Map** 中下个位置的值
+2. 该值对应的键
+3. 目标 **Map** 自身
+
+如下：
+```js
+    const map = new Map([[ 'a', 1 ], [ 'b', 2 ]])
+
+    map.forEach((value, key, own) => {
+        // 第一次循环打印 1 ；第二次循环打印 2 ；
+        console.log(value)
+        // 第一次循环打印 a ；第二次循环打印 b ；
+        console.log(key)
+        // 第一次循环打印 true ；第二次循环打印 true ；
+        console.log(map === own)
+    })
+
+```
+
+> 你也可以给 forEach() 提供第二个参数来指定回调函数中的 this 值，其行为与 Set 版本的 forEach() 一致。
+
+### Weak Map
+Weak Map 对 Map 而言，就像 Weak Set 对 Set 一样：Weak 版本都是存储对象弱引用的方式。在 **Weak Map** 中，所有的键对必须是对象（如果使用非对象则会抛出错误），而且这些对象都是弱引用，不会干扰垃圾回收。当 **Weak Map** 中的键在 **Weak Map** 之外不存在引用时，该键值对会被移除。
+
+**Weak Map** 的最佳用武之地，就是在浏览器中创建一个关联到特定 **DOM** 元素的对象。例如，某些用在网页上的 **JS** 库会维护一个自定义对象，用于引用该库所使用的每一个 **DOM** 元素，并且其映射关系会存储在内部的对象缓存中。
+
+该方法的困难之处在于：如何判断一个 **DOM** 元素已不复存在于网页中，以便该库能移除此元素的关联对象。若做不到，该库就会继续保持对 **DOM** 元素的一个无效引用，并造成内存泄漏。使用 **Weak Map** 来追踪 **DOM** 元素，依然允许将自定义对象关联到每个 **DOM** 元素，而在此对象所关联的 **DOM** 元素不复存在时，它就会在 **Weak Map** 中被自动销毁。
+
+> 必须注意的是， **Weak Map** 的键才是弱引用，而值不是。在 **Weak Map** 的值中存储对象会阻止垃圾回收，即使该对象的其他引用已全都被移除。
+
+### 使用 Weak Map
+ES6 的 `Weak Map` 类型是键值对的无序列表，其中键必须是非空的对象，值则允许是任意类型。 `Weak Map` 的接口与 `Map` 的非常相似，都使用 `set()` 与 `get()` 方法来分别添加与提取数据。如下：
+```html
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title></title>
+    </head>
+    <body>
+        <div id="ele">123</div>
+    </body>
+    </html>
+
+    <script>
+        let map = new WeakMap()
+        let ele = document.querySelector("#ele")
+
+        map.set(ele, 'dom')
+
+        const value = map.get(ele)
+        console.log(value) // dom
+
+        // 删除元素
+        ele.parentNode.removeChild(ele)
+
+        ele = null
+
+        // 该 Weak Map 在此处为空
+    </script>
+```
+
+类似于 Weak Set ，没有任何办法可以确认 Weak Map 是否为空，因为它没有 `size` 属性。在其他引用被移除后，由于对键的引用不再有残留，也就无法调用 `get()` 方法来提取对应的值。Weak Map  已经切断了对于该值的访问，其所占的内存在垃圾回收器运行时便会被释放。
+
+### Weak Map 的初始化
+和正规的 `Map` 构造器一样，初始化 **Weak Map**，也需要把一个由数组构成的数组传递给 `Weak Map` 构造器。每个内部数组都要有两个值，第一项是作为键的非空对象，第二项则是对应的值（任意类型`any`）。如下：
+```js
+    const key1 = {}
+    const key2 = {}
+    const map = new WeakMap([[ key1, 1 ], [ key2, 2 ]])
+
+    console.log(map.get(key1)) // 1
+    console.log(map.get(key2)) // 2
+```
+
+!> 在传递给 **WeakMap** 构造器的参数中，若任意键值对使用了非对象的键，构造器就会抛出错误。
+
+### Weak Map 的方法
+Weak Map 只有两个附加方法能用来与键值对交互。
+1. `has()` 方法用于判断指定的键是否存在于 Map 中。
+2. `delete()` 方法则用于移除一个特定的键值对。
+
+需要注意的是 **Weak Map** 上是没有 `clear()` 方法的，这是因为没必要对键进行枚举，而且也不可能对 Weak Map 进行枚举。
+
+此示例使用了两种方法，如下：
+```js
+    const key1 = {}
+    const key2 = {}
+    let map = new WeakMap([[ key1, 1 ], [ key2, 2 ]])
+
+    console.log(map.has(key1)) // true
+    console.log(map.has(key2)) // true
+
+    map.delete(key1)
+    map.delete(key2)
+
+    console.log(map.has(key1)) // false
+    console.log(map.has(key2)) // false
+```
+
+### 使用 Weak Map 来创建对象的私有数据
+Weak Map 的另一个实际应用就是在对象实例中存储私有数据。如下：
+```js
+    let Person = (function() {
+        let privateData = new WeakMap()
+
+        function Person(name) {
+            privateData.set(this, { name: name })
+        }
+
+        Person.prototype.getName = function() {
+            return privateData.get(this).name
+        }
+
+        return Person
+    }())
+
+    const person = new Person('反芹菜联盟盟主')
+
+    person.getName() // 反芹菜联盟盟主
+```
+
+由于 `Person` 对象的实例本身能被作为键来使用，于是也就无须再记录单独的 `ID` 。当 `Person` 构造器被调用时，将 `this` 作为键在 `Weak Map` 上建立了一个入口，而包含私有信息的对象成为了对应的值，其中只存放了 `name` 属性。通过将 `this` 传递给 `privateData.get()` 方法，以获取值对象并访问其 `name` 属性， `getName()` 函数便能提取私有信息。这种技术让私有信息能够保持私有状态，并且当与之关联的对象实例被销毁时，私有信息也会被同时销毁。
+
+### 总结
+**Set** 是无重复值的有序列表。根据 `Object.is()` 方法来判断其中的值不相等，以保证无重复。**Set** 会自动移除重复的值，因此我们也可以使用它来过滤数组的重复值。我们可以使用 `has()` 方法来判断某一个值是否存在于 **Set** 中，也可以通过 `size` 属性查看其中有多少值。也可以使用 `forEach()` 方法，来处理每个值。
+
+Weak Set 是只能包含对象的特殊 Set 。其中的对象使用弱引用来存储，意味着当 Weak Set中的项是某个对象的仅存引用时，它不会屏蔽垃圾回收。由于内存管理的复杂性， Weak Set的内容不能被检查，因此最好将 Weak Set 仅用于追踪需要被归组在一起的对象。
+
+Map 是有序的键值对，其中的键允许是任何类型。与 Set 相似，通过调用 `Object.is()` 方法来判断重复的键，这意味着能将数值 5 与字符串 "5" 作为两个相对独立的键。使用 `set()` 方法能将任何类型的值关联到某个键上，并且该值此后能用 `get()` 方法提取出来。Map 也拥有一个 size 属性与一个 `forEach()` 方法，让项目访问更容易。
+
+Weak Map 是只能包含对象类型的键的特殊 Map 。与 Weak Set 相似，键的对象引用是弱引用，因此当它是某个对象的仅存引用时，也不会屏蔽垃圾回收。当键被回收之后，所关联的值也同时从 Weak Map 中被移除。
