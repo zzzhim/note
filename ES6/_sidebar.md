@@ -15,5 +15,6 @@
     - [符号（Symbol）与符号（Symbol）属性](/symbol.md)
     - [Set与Map](/SetAndMap.md)
     - [迭代器与生成器](/generator.md)
+    - [JS的类](/class.md)
 
 - [参考文章](README.md)
