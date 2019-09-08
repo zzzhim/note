@@ -16,5 +16,6 @@
     - [Set与Map](/SetAndMap.md)
     - [迭代器与生成器](/generator.md)
     - [JS的类](/class.md)
+    - [增强的数组功能](/arrayMethod.md)
 
 - [参考文章](README.md)
