@@ -567,3 +567,44 @@ Promise 链的另一个重要方面是能从一个 Promise 传递数据给下一
 
 ### 异步任务运行
 前面使用了生成器，实现了一个异步任务运行器，现在我们使用 **Promise** 改造一下。
+
+如下：
+```js
+    function run(taskDef) {
+        let task = taskDef()
+
+        let result = task.next()
+
+        function step() {
+            if(!result.done) {
+                let promise = Promise.resolve(result.value)
+
+                promise.then(data => {
+                    console.log(data)
+                    result = task.next(data)
+                    step()
+                }).catch(err => {
+                    console.log(err)
+                    result = task.throw(err)
+                    step()
+                })
+            }
+        }
+        step()
+    }
+
+    const iterator = function* () {
+        let content = yield 1
+        content = yield content + 1
+        content = yield new Error(content + 1)
+        content = yield 4
+    }
+
+    run(iterator)
+
+    // 输出
+    // 1
+    // 2
+    // Error: 3
+    // 4
+```
