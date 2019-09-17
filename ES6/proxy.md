@@ -247,12 +247,36 @@
 
 `Object.setPrototypeOf()` 方法与 `Reflect.setPrototypeOf()` 方法会被传入相同的参数。另一方面， `getPrototypeOf` 陷阱函数只接受 `trapTarget` 参数， `Object.getPrototypeOf()` 方法与 `Reflect.getPrototypeOf()` 方法也是如此。
 
-下面的例子通过返回 `null` 隐藏了代理对象的原型，并且使得该原型不可被修改：
+> 原文的例子如下：
+> 下面这个例子通过返回 `null` 隐藏了代理对象的原型，并且使得该原型不可被修改：
+```js
+    let target = {};
+    let proxy = new Proxy(target, {
+        getPrototypeOf(trapTarget) {
+            return null;
+        },
+        setPrototypeOf(trapTarget, proto) {
+            return false;
+        }
+    });
+    let targetProto = Object.getPrototypeOf(target);
+    let proxyProto = Object.getPrototypeOf(proxy);
+    console.log(targetProto === Object.prototype); // true
+    console.log(proxyProto === Object.prototype); // false
+    console.log(proxyProto); // null
+    // 成功
+    Object.setPrototypeOf(target, {});
+    // 抛出错误
+    Object.setPrototypeOf(proxy, {});
+```
+> 当我试图在控制台执行原文的例子时，Chrome浏览器会抛出 `'getPrototypeOf' on proxy: trap returned neither object nor null` ，原因是因为在 `getPrototypeOf` 返回了一个 `null`，具体为什么会抛出错误，我也没有找到原因。因此我在上述例子中稍微做了一些修改：
+
+下面的例子通过返回原型为 `null` 的空对象，隐藏了代理对象的原型，并且使得该原型不可被修改：
 ```js
     let target = {}
     let proxy = new Proxy(target, {
         getPrototypeOf(trapTarget) {
-            return null
+            return Object.create(null)
         },
         setPrototypeOf(trapTarget, proto) {
             return false
@@ -261,9 +285,192 @@
 
     const proxyProto = Object.getPrototypeOf(proxy)
 
-
-    console.log(proxyProto) // null
+    console.log(proxyProto) // 原型为 `null` 的空对象
 
     // 抛出错误
-    // Object.setPrototypeOf(proxy, {})
+    Object.setPrototypeOf(proxy, {})
 ```
+
+如果我们想在两个陷阱函数中使用默认的行为，那么只需调用 `Reflect` 对象上的相应方法。如下：
+```js
+    let target = {}
+    let proxy = new Proxy(target, {
+        getPrototypeOf(trapTarget) {
+            return Reflect.getPrototypeOf(trapTarget)
+        },
+        setPrototypeOf(trapTarget, proto) {
+            return Reflect.setPrototypeOf(trapTarget, proto)
+        }
+    })
+
+    let targetProto = Object.getPrototypeOf(target)
+    let proxyProto =  Object.getPrototypeOf(proxy)
+
+    console.log(targetProto === Object.prototype) // true
+    console.log(proxyProto === Object.prototype)  // true
+
+    // 成功
+    Object.setPrototypeOf(target, {})
+    // 同样成功
+    Object.setPrototypeOf(proxy, {})
+```
+
+### 两组方法的不同之处
+`Reflect.getPrototypeOf()` 和 `Reflect.setPrototypeOf` 虽然看起来与 `Object.getPrototypeOf()` 和 `Object.setPrototypeOf` 很相似，但它们两个之间仍然有着显著差异。
+
+首先 `Object.getPrototypeOf()` 和 `Object.setPrototypeOf` 属于高级操作，从产生之初便已提供给开发者使用；而 `Reflect.getPrototypeOf()` 和 `Reflect.setPrototypeOf` 属于底层操作，允许开发者访问 `[[GetPrototypeOf]]` 与 `[[SetPrototypeOf]]` 这两个原先仅供语言内部使用的操作。
+
+`Reflect.getPrototypeOf()` 方法是对内部的 `[[GetPrototypeOf]]` 操作的封装（并且附加了一些输入验证），而 `Reflect.setPrototypeOf()` 方法与 `[[SetPrototypeOf]]` 操作之间也有类似的关系。
+
+虽然 `Object` 对象上的同名方法也调用了 `[[GetPrototypeOf]]` 与 `[[SetPrototypeOf]]` ，但它们在调用这两个操作之前添加了一些步骤、并检查返回值，以决定如何行动。
+
+`Reflect.getPrototypeOf()` 方法在接收到的参数不是一个对象时会抛出错误，而 `Object.getPrototypeOf()` 则会在操作之前先将参数值转换为一个对象。如下：
+```js
+    const result = Object.getPrototypeOf(1)
+
+    console.log(result === Number.prototype) // true
+
+    // 抛错
+    Reflect.getPrototypeOf(1)
+```
+
+`Reflect.setPrototypeOf()` 方法方法返回一个布尔值用于表示操作是否已成功，成功时返回 `true` ，失败时返回 `false`； `Object.setPrototypeOf()` 方法的操作失败时，它会抛出错误。`Object.setPrototypeOf()` 方法会将传入的第一个参数作为自身的返回值，因此并不适合用来实现 `setPrototypeOf` 代理陷阱的默认行为。如下：
+```js
+    let target1 = {}
+    let result1 = Object.setPrototypeOf(target1, {})
+
+    console.log(result1 === target1) // true
+
+    let target2 = {}
+    let result2 = Reflect.setPrototypeOf(target2, {})
+
+    console.log(result2 === target2) // false
+    console.log(result2) // true
+```
+
+### 对象可扩展性的陷阱函数
+ES5 通过 `Object.preventExtensions()` 与 `Object.isExtensible()` 方法给对象增加了可扩展
+性。
+
+ES6 通过 `preventExtensions` 与 `isExtensible` 陷阱函数允许代理拦截对于底层对象的方法调用。这两个陷阱函数都接受名为 `trapTarget` 的单个参数，此参数代表方法在哪个对象上被调用。同时 `Reflect` 上面也存在对应的  `Reflect.preventExtensions()` 与 `Reflect.isExtensible()` 方法，用于实现默认的行为。这两个方法都返回布尔值，因此它们可以在对应的陷阱函数内直接使用。
+
+> `Object.isExtensible()` 方法判断一个对象是否是可扩展的（是否可以在它上面添加新的属性）。
+>
+> `Object.preventExtensions()` 方法让一个对象变的不可扩展，也就是永远不能再添加新的属性。
+
+###### 两个基本范例
+下列代码实现了 `isExtensible` 与 `preventExtensions` 陷阱函数的默认行为。
+```js
+    let target = {}
+    let proxy = new Proxy(target, {
+        isExtensible(trapTarget) {
+            return Reflect.isExtensible(trapTarget)
+        },
+        preventExtensions(trapTarget) {
+            return Reflect.preventExtensions(trapTarget)
+        }
+    })
+
+    console.log(Object.isExtensible(target)) // true
+    console.log(Object.isExtensible(proxy)) // true
+
+    // 正常运行
+    Object.defineProperty(target, "name", { value: "zzzhim" })
+
+    // 让对象变得不可扩展
+    Object.preventExtensions(proxy)
+
+    console.log(Object.isExtensible(target)) // false
+    console.log(Object.isExtensible(proxy)) // false
+
+    // 抛出错误：Cannot define property value, object is not extensible
+    Object.defineProperty(target, "value", { value: 111 })
+```
+
+我们也可以在 `preventExtensions` 陷阱函数上返回 `false`，来让代理上的 `Object.preventExtensions()` 操作失败。如下：
+> 原文代码如下：
+```js
+    let target = {}
+    let proxy = new Proxy(target, {
+        isExtensible(trapTarget) {
+            return Reflect.isExtensible(trapTarget)
+        },
+        preventExtensions(trapTarget) {
+            return false
+        }
+    })
+    console.log(Object.isExtensible(target)) // true
+    console.log(Object.isExtensible(proxy)) // true
+    Object.preventExtensions(proxy)
+    console.log(Object.isExtensible(target)) // true
+    console.log(Object.isExtensible(proxy)) // true
+```
+> 此代码在 `Chrome` 和 `FireFox` 执行时分别会抛出 `'preventExtensions' on proxy: trap returned falsish at Function.preventExtensions ` 和 ` proxy preventExtensions handler returned false` 错误。
+
+!> `Object.isExtensible()` 方法与 `Reflect.isExtensible()` 方法几乎一样，只在接收到的参数不是一个对象时才有例外。此时 `Object.isExtensible()` 总是会返回 `false` ，而 `Reflect.isExtensible()` 则会抛出一个错误。
+
+### 属性描述符的陷阱函数
+ES5 的最重要的特征之一就是引入了 `Object.defineProperty()` 方法用于定义属性的特征，它能让我们直接在一个对象上定义一个新属性，或者修改一个对象的现有属性，并且能让属性变成只读或是不可枚举的。我们还可以利用 `Object.getOwnPropertyDescriptor()` 方法检索这些特性。
+
+代理允许我们使用 `defineProperty` 与 `getOwnPropertyDescriptor` 陷阱函数，来分别拦截对于 `Object.defineProperty()` 与 `Object.getOwnPropertyDescriptor()`。
+
+`defineProperty` 陷阱函数接受下列三个参数：
+1. `trapTarget` ：需要被定义属性的对象（即代理的目标对象）；
+2. `key` ：属性的键（字符串类型或符号类型）；
+3. `descriptor` ：为该属性准备的描述符对象。
+
+`defineProperty` 陷阱函数要求你在操作成功时返回 `true` ，否则返回 `false` 。 `getOwnPropertyDescriptor` 陷阱函数则只接受 `trapTarget` 与 `key` 这两个参数，并会返回对应的描述符。 `Reflect.defineProperty()` 与 `Reflect.getOwnPropertyDescriptor()` 方法作为上述陷阱函数的对应方法，接受与之相同的参数。
+
+此代码实现了每个陷阱函数的默认行为，如下：
+```js
+    let target = {}
+    let proxy = new Proxy(target, {
+        defineProperty(trapTarget, key, descriptor) {
+            return Reflect.defineProperty(trapTarget, key, descriptor)
+        },
+        getOwnPropertyDescriptor(trapTarget, key) {
+            return Reflect.getOwnPropertyDescriptor(trapTarget, key)
+        }
+    })
+
+    Object.defineProperty(proxy, "name", {
+        value: "zzzhim"
+    })
+
+    console.log(proxy.name) // "zzzhim"
+
+    let descriptor = Object.getOwnPropertyDescriptor(proxy, "name");
+
+    console.log(descriptor.value) // "zzzhim"
+```
+
+### 阻止 Object.defineProperty()
+`defineProperty` 陷阱函数要求你返回一个布尔值用于表示操作是否已成功。当它返回 `true` 时， `Object.defineProperty()` 会正常执行；如果它返回 `false` ，则会抛出错误。我们可以利用这个特性，来限制可以被 `Object.defineProperty()` 的属性。
+
+如下：
+```js
+    let target = {}
+    let proxy = new Proxy(target, {
+        defineProperty(trapTarget, key, descriptor) {
+            if(typeof key === "symbol") {
+                return false
+            }
+
+            return Reflect.defineProperty(trapTarget, key, descriptor)
+        }
+    })
+
+    const symbol = Symbol("name")
+
+    // 抛出错误
+    Object.defineProperty(proxy, symbol, {
+        value: "zzzhim"
+    })
+```
+
+当 `key` 值为 `Symbol` 类型时，我们在 `defineProperty` 陷阱函数中返回 `false`，导致程序抛出错误。
+
+> 你可以让陷阱函数返回 `true` ，同时不去调用 `Reflect.defineProperty()` 方法，这样 `Object.defineProperty()` 就会静默失败，如此便可在未实际去定义属性的情况下抑制运行错误。
+
+### 描述符对象的限制
+为了确保 `Object.defineProperty()` 与 `Object.getOwnPropertyDescriptor()` 方法的行为一致，传递给 `defineProperty` 陷阱函数的描述符对象必须是正规的。出于同一原因， `getOwnPropertyDescriptor` 陷阱函数返回的对象也始终需要被验证。
