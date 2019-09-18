@@ -474,3 +474,277 @@ ES5 的最重要的特征之一就是引入了 `Object.defineProperty()` 方法�
 
 ### 描述符对象的限制
 为了确保 `Object.defineProperty()` 与 `Object.getOwnPropertyDescriptor()` 方法的行为一致，传递给 `defineProperty` 陷阱函数的描述符对象必须是正规的。出于同一原因， `getOwnPropertyDescriptor` 陷阱函数返回的对象也始终需要被验证。
+
+任意对象都能作为 `Object,defineProperty()` 方法的第三个参数；然而能够传递给 `defineProperty` 陷阱函数的描述对象参数，则只有 `enumerable `、 `configurable` 、 `value` 、 `writable` 、 `get` 与 `set` 这些属性。
+
+如下：
+```js
+    let proxy = new Proxy({}, {
+        defineProperty(trapTarget, key, descriptor) {
+            console.log(descriptor) // 描述对象输出 {{ value: value }} 并没有 name 属性
+            return  Reflect.defineProperty(trapTarget, key, descriptor)
+        }
+    })
+
+    Object.defineProperty(proxy, "name", {
+        value: "value",
+        name: "zzzhim"
+    })
+```
+
+`getOwnPropertyDescriptor` 陷阱函数有一个微小差异，要求返回值必须是 `null` 、 `undefined` ，或者是一个对象。当返回值是一个对象时，只允许该对象拥有 `enumerable `、 `configurable` 、 `value` 、 `writable` 、 `get` 与 `set` 这些属性。如果返回的对象包含了不被许可的自有属性，则程序会抛出错误。
+
+如下：
+```js
+    let proxy = new Proxy({}, {
+        getOwnPropertyDescriptor(trapTarget, key) {
+            return {
+                name: "zzzhim"
+            }
+        }
+    })
+
+    // 抛错
+    Object.getOwnPropertyDescriptor(proxy, "name")
+```
+
+?> `Object.getOwnPropertyDescriptor()` 的返回值总是拥有可信任的结构，无论是否使用了代理。
+
+### 重复的描述符方法
+
+###### defineProperty() 方法
+`Object.defineProperty()` 方法与 `Reflect.defineProperty()` 方法几乎一模一样，只是返回值有区别。
+
+如下：
+```js
+    let target = {}
+    let result1 = Object.defineProperty(target, "name", { value: "target" })
+
+    console.log(target === result1) // true
+
+    let result2 = Reflect.defineProperty(target, "name", { value: "target" })
+
+    console.log(result2) // true
+```
+
+?> 如上，前者返回的是调用它时的第一个参数，而后者在操作成功时返回 `true` 、失败时返回 `false`。
+
+###### getOwnPropertyDescriptor() 方法
+`Object.getOwnPropertyDescriptor()` 方法会在接收的第一个参数是基本类型值时，将该参数转化为对象。而 `Reflect.getOwnPropertyDescriptor()` 方法则会在第一个参数是基本类型值的时候抛出错误。
+```js
+    let descriptor1 = Object.getOwnPropertyDescriptor(2, "name")
+    console.log(descriptor1) // undefined
+    // 抛出错误
+    let descriptor2 = Reflect.getOwnPropertyDescriptor(2, "name")
+```
+
+### ownKeys 陷阱函数
+`ownKeys` 代理陷阱拦截了内部方法 `[[OwnPropertyKeys]]` ，并允许你返回一个数组用于重写该行为。返回的这个数组会被用于四个方法：
+1. `Object.keys()` 方法；
+2. `Object.getOwnPropertyNames()` 方法；
+3. `Object.getOwnPropertySymbols()` 方法；
+4. `Object.assign()` 方法；
+
+?> 其中 `Object.assign()` 方法会使用该数组来决定哪些属性会被复制。
+
+`ownKeys` 陷阱函数的默认行为由 `Reflect.ownKeys()` 方法实现，会返回一个由全部自有属性的键构成的数组，无论键的类型是字符串还是符号。
+
+`Object.getOwnPropertyNames()` 方法与 `Object.keys()` 方法会将符号值从该数组中过滤出去；
+
+`Object.getOwnPropertySymbols()` 会将字符串值过滤掉；
+
+`Object.assign()` 方法会使用数组中所有的字符串值与符号值；
+
+`ownKeys` 陷阱函数接受单个参数，即目标对象，同时必须返回一个数组或者一个类数组对象，不合要求的返回值会导致错误。我们可以使用 `ownKeys` 陷阱函数去过滤特定的属性，以避免这些属性被 `Object.keys()` 方法，`Object.getOwnPropertyNames()` 、`Object.getOwnPropertySymbols()` 、`Object.assign()`方法使用。
+
+如下，我们过滤掉名为 `name` 的属性：
+```js
+    let proxy = new Proxy({}, {
+        ownKeys(trapTarget) {
+            return Reflect.ownKeys(trapTarget).filter(key => key !== "name")
+        }
+    })
+
+    proxy.name = "zzzhim"
+    proxy.age = 23
+
+    let keys = Object.keys(proxy)
+
+    console.log(keys) // [ age ]
+
+    let names = Object.getOwnPropertyNames(proxy)
+
+    console.log(names) // [ age ]
+```
+
+> `ownKeys` 陷阱函数也能影响 `for-in` 循环，因为这种循环调用了陷阱函数来决定哪些值能够被用在循环内。
+
+### 使用 apply 与 construct 陷阱函数的函数代理
+在所有的代理陷阱中，只有 `apply` 与 `construct` 要求代理目标对象必须是一个函数。
+
+之前提到过，函数拥有两个内部方法：`[[Call]]` 与 `[[Construct]]` ，前者会在函数被直接调用时执行，而后者会在函数被使用 `new` 运算符调用时执行。`[[Call]]` 会在函数被直接调用时执行，而后者会在函数被使用 `new` 运算符调用时执行。
+
+`apply` 与 `construct` 陷阱函数对应着这两个内部方法，并允许我们对其进行重写。当不使用 `new` 去调用一个函数时， `apply` 陷阱函数会接收到下列三个参数（`Reflect.apply()` 也会接收这些参数）：
+1. `trapTarget`：被执行的函数（即代理的目标对象）；
+2. `thisArg`：调用过程中函数内部的 `this` 值；
+3. `argumentsList`：被传递给函数的参数数组；
+
+当使用 `new` 去执行函数时，`construct` 陷阱函数会被调用并接收到下列两个参数：
+1. `trapTarget`：被执行的函数（即代理的目标对象）；
+2. `argumentsList`：被传递给函数的参数数组；
+
+`Reflect.construct()` 方法同样会接收到这两个参数，还会收到可选的第三个参数 `newTarget`，如果提供了此参数，则它就指定了函数内部的 `new.target` 值。
+
+`apply` 与 `construct`陷阱函数结合起来就能够完全控制任意目标对象函数的行为。
+
+模拟函数的默认行为，如下：
+```js
+    let targetFun = function() {
+        return 23
+    }
+
+    let proxy = new Proxy(targetFun, {
+        apply(trapTarget, thisArg, argumentsList) {
+            return Reflect.apply(trapTarget, thisArg, argumentsList)
+        },
+        construct(trapTarget, argumentsList) {
+            return Reflect.construct(trapTarget, argumentsList)
+        }
+    })
+
+    // 使用了函数的代理，其目标对象会被视为函数
+    console.log(typeof proxy) // function
+    console.log(proxy()) // 23
+
+    const instance = new proxy()
+    console.log(instance instanceof proxy) // true
+    console.log(instance instanceof targetFun) // true
+```
+
+### 验证函数的参数
+`apply` 与 `construct` 陷阱函数在函数的执行方式上开启了很多的可能性。
+
+如下，我们可以通过 `apply` 陷阱函数保证参数必须是数值类型，并且函数不能使用 `new` 调用。
+```js
+    const sum = function (...values) {
+        console.log(values)
+    }
+    
+    const sumProxy = new Proxy(sum, {
+        apply(trapTarget, thisArg, argumentsList) {
+            argumentsList.forEach(value => {
+                if(typeof value !== "number") {
+                    throw new TypeError("All arguments must be numbers.")
+                }
+            })
+
+            return Reflect.apply(trapTarget, thisArg, argumentsList)
+        },
+        construct(trapTarget, argumentsList) {
+            throw new TypeError("This function can't be called with new.")
+        }
+    })
+
+    console.log(sumProxy(1, 2, 3, 4)) // [ 1, 2, 3, 4 ]
+
+    
+    console.log(sumProxy("1", 2, 3, "4")) // 抛错
+
+    const newSum = new sumProxy()  // 抛错
+```
+
+相反的，你也可以限制函数必须使用 `new` 运算符调用，同时确保它的参数都是数值。
+
+### 调用构造器而无须使用 new
+前面介绍了我们可以通过 `new.target` 来判断函数是否使用了 `new`。就像这样：
+```js
+    function Numbers(...values) {
+        if(typeof new.target === "undefined") {
+            throw new TypeError("This function must be called with new.")
+        }
+
+        this.values = values
+    }
+
+    const instance = new Numbers(1, 2, 3)
+
+    console.log(instance.values) // [ 1, 2, 3 ]
+
+    // 抛出错误
+    Numbers(1, 2, 3)
+```
+
+上面的这个例子，`Numbers` 函数必须要使用 `new` 才能够正常执行，在用户不知情的情况下，通常会造成不必要的错误。我们可以使用 `apply` 陷阱函数来规避必须使用 `new` 调用这个限制，如下：
+```js
+    function Numbers(...values) {
+        if(typeof new.target === "undefined") {
+            throw new TypeError("This function must be called with new.")
+        }
+
+        this.values = values
+    }
+
+    const proxy = new Proxy(Numbers, {
+        apply(trapTarget, thisArg, argumentsList) {
+            return Reflect.construct(trapTarget, argumentsList)
+        }
+    })
+
+    const instance1 = new proxy(1, 2, 3)
+
+    console.log(instance1.values) // [ 1, 2, 3 ]
+
+    const instance2 = proxy(1, 2, 3)
+
+    console.log(instance2.values) // [ 1, 2, 3 ]
+```
+
+`proxy` 函数允许我们调用 `Numbers` 并且无须使用 `new` ，并且这种调用方式的效果与使用 `new` 是完全一致的。
+
+### 可被调用的类构造器
+前面说明了构造器必须始终使用 `new` 来调用，原因是类构造器的内部方法 `[[Call]]` 被明确要求抛出错误。然而代理可以拦截对于 `[[Call]]` 方法的调用，意味着我们可以借助代理创建一个可以被直接调用的类构造器。
+
+如下，我们想让类构造器不使用 `new` 的情况下也能够正常工作，我们可以使用 `apply` 陷阱函数来创建一个新的实例：
+```js
+    class Person {
+        constructor(name) {
+            this.name = name
+        }
+    }
+
+    const PersonProxy = new Proxy(Person, {
+        apply(trapTarget, thisArg, argumentsList) {
+            return new trapTarget(...argumentsList)
+        }
+    })
+
+    const obj = PersonProxy("zzzhim")
+
+    console.log(obj.name) // zzzhim
+    console.log(obj instanceof Person) // true
+```
+
+### 可被撤销的代理
+代理在被创建之后，通常就不能再从目标对象上被解绑了。我之前使用的例子都是使用了不可被撤销的代理。
+
+有些情况下我们可能想要撤销一个代理使它不能够再被使用。我们可以使用 `Proxy.revocable()` 方法来创建一个可被撤销的代理，该方法接收的参数与 `Proxy` 构造器相同：
+1. `proxy`：可被撤销的代理对象；
+2. `revoke`：用于撤销代理的函数；
+
+当 `revoke()` 函数被调用后，就不能再对该 `proxy` 对象进行更多操作，任何与该代理对象交互的意图都会触发代理的陷阱函数，从而抛出一个错误。
+
+如下：
+```js
+    const target = {
+        name: "zzzhim"
+    }
+
+    const { proxy, revoke } = Proxy.revocable(target, {})
+
+    console.log(proxy.name) // zzzhim
+
+    revoke()
+
+    // 抛出错误
+    console.log(proxy.name)
+```
