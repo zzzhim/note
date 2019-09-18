@@ -19,4 +19,5 @@
     - [增强的数组功能](/arrayMethod.md)
     - [Promise与异步编程](/promise.md)
     - [代理与反射接口](/proxy.md)
+    - [用模块封装代码](/modules.md)
 - [参考文章](README.md)
