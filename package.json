@@ -14,9 +14,9 @@
     },
     "homepage": "https://github.com/zzzhim/note#readme",
     "scripts": {
-        "serve": "docsify serve ../ES6"
+        "serve": "docsify serve ./"
     },
     "dependencies": {
         "docsify-cli": "^4.3.0"
     }
-} 
+}
