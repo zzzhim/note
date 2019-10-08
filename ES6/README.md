@@ -13,4 +13,4 @@
 - [Understanding ECMAScript 6](https://leanpub.com/understandinges6/read)
 - [Understanding ECMAScript 6 中文翻译](https://legacy.gitbook.com/book/sagittarius-rev/understanding-ecmascript-6-zh-ver/details)
 
-### [github](https://github.com/zzzhim/note/tree/master/ES6)地址
+### [github地址](https://github.com/zzzhim/note/tree/master/ES6)

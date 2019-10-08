@@ -6,8 +6,8 @@
  * @LastEditors: Please set LastEditors
  -->
 - js设计模式
-    - [模块模式](src/module.md)
-    - [链模式](src/chain.md)
-    - [MVC、MVP、MVVM](src/mvc、mvp、mvvm.md)
+    - [模块模式](/JsPattern/src/module.md)
+    - [链模式](/JsPattern/src/chain.md)
+    - [MVC、MVP、MVVM](/JsPattern/src/mvc、mvp、mvvm.md)
 
-- [参考文章](README.md)
+- [参考文章](/JsPattern/README.md)
