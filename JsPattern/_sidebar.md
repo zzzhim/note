@@ -9,5 +9,6 @@
     - [模块模式](/JsPattern/src/module.md)
     - [链模式](/JsPattern/src/chain.md)
     - [MVC、MVP、MVVM](/JsPattern/src/mvc、mvp、mvvm.md)
+    - [发布订阅模式](/JsPattern/src/observerPattern.md)
 
 - [参考文章](/JsPattern/README.md)
