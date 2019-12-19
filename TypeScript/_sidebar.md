@@ -6,6 +6,6 @@
  * @LastEditors: Please set LastEditors
  -->
 - TypeScript笔记
-    <!-- - [模块模式](/JsPattern/src/module.md) -->
+    - [八个JS中的常见类型](/TypeScript/src/baseType.md)
 
 <!-- - [参考文章](/JsPattern/README.md) -->
