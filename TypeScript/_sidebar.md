@@ -12,5 +12,6 @@
     - [联合类型](/TypeScript/src/unionTypes.md)
     - [枚举](/TypeScript/src/enum.md)
     - [接口](/TypeScript/src/interface.md)
+    - [函数](/TypeScript/src/function.md)
 
 <!-- - [参考文章](/JsPattern/README.md) -->
