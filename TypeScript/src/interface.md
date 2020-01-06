@@ -102,3 +102,49 @@
     // Argument of type '""' is not assignable to parameter of type 'number'.
     fun(1, "")
 ```
+
+### 继承接口
+接口也可以继承，就和类一样，这样提高了接口的复用性。如下：
+```ts
+    interface Name {
+        name: string
+    }
+
+    interface Sex {
+        sex: string
+    }
+
+    interface Person extends Name, Sex {
+        height: string
+    }
+
+    let person: Person = {
+      name: "zzzhim",
+      sex: "男",
+      height: "1.85"
+    }
+```
+
+> 一个接口可以继承多个接口，就像上面一样使用逗号分隔就行了。
+
+### 混合类型
+在JS中类型是灵活多变的，例如函数，它既是一个函数也拥有自己的属性。我们经常可以看到利用函数来实现一个计数器的闭包，下面我们来使用TS中的混合类型实现一个类似的功能。如下：
+```ts
+    interface Fun {
+        (): number
+        count: number
+    }
+
+    const fun = ((): Fun => {
+        const fun = (): number => ++fun.count
+        fun.count = 0
+        return fun
+    })()
+
+    console.log(fun()) // 1
+    console.log(fun()) // 2
+    console.log(fun()) // 3
+    console.log(fun()) // 4
+    console.log(fun()) // 5
+    console.log(fun()) // 6
+```
