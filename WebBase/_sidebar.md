@@ -18,6 +18,5 @@
     - [Vuex 中 action 和 mutation 有什么区别](/WebBase/src/10.md)
     - [Js严格模式有什么特点](/WebBase/src/11.md)
     - [HTTP跨域请求时为何发送 options 请求](/WebBase/src/12.md)
+    - [什么是跨域](/WebBase/src/13.md)
 
-
-<!-- - [参考文章](/JsPattern/README.md) -->
