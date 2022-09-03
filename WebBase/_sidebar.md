@@ -14,6 +14,7 @@
     - [for-in和for-of的区别](/WebBase/src/6.md)
     - [盒子模型](/WebBase/src/7.md)
     - [Vue Computed 和 Watch的区别](/WebBase/src/8.md)
+    - [Vue 组件通讯有几种方式](/WebBase/src/9.md)
 
 
 <!-- - [参考文章](/JsPattern/README.md) -->
