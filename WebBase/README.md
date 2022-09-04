@@ -17,7 +17,13 @@
     - [Vue Computed 和 Watch的区别](/WebBase/src/8.md)
     - [Vue 组件通讯有几种方式](/WebBase/src/9.md)
     - [Vuex 中 action 和 mutation 有什么区别](/WebBase/src/10.md)
-    - [Js严格模式有什么特点](/WebBase/src/11.md) 
+    - [Js严格模式有什么特点](/WebBase/src/11.md)
+    - [HTTP跨域请求时为何发送 options 请求](/WebBase/src/12.md)
+    - [什么是跨域](/WebBase/src/13.md)
+    - [Js内存泄露与闭包](/WebBase/src/14.md)
+    - [浏览器事件循环和NodeJs事件循环有什么区别？](/WebBase/src/15.md)
+    - [vdom（虚拟DOM）](/WebBase/src/16.md)
+    - [diff算法](/WebBase/src/17.md)
 
 
 ### 参考文章
