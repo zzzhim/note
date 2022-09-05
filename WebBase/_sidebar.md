@@ -28,7 +28,8 @@
     - [Vue 生命周期](/WebBase/src/19.md)
     - [Vue-router（React router） 三种模式](/WebBase/src/20.md)
     - [token和cookie的区别](/WebBase/src/21.md)
-    - [HTTP协议和UDP协议有什么区别](/WebBase/src/22.md)
+    - [HTTP协议和UDP协议有什么区别？](/WebBase/src/22.md)
     - [关于HTTPS](/WebBase/23.md)
-    - [requestIdleCallback和requestAnimationFrame的区别](/WebBase/src/24.md)
+    - [requestIdleCallback和requestAnimationFrame的区别？](/WebBase/src/24.md)
+    - [script标签的defer和async的区别？](/WebBase/src/25.md)
 
