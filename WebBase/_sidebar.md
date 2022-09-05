@@ -32,4 +32,5 @@
     - [关于HTTPS](/WebBase/23.md)
     - [requestIdleCallback和requestAnimationFrame的区别？](/WebBase/src/24.md)
     - [script标签的defer和async的区别？](/WebBase/src/25.md)
+    - [prefetch和dns-prefetch分别是什么？](/WebBase/src/26.md)
 
