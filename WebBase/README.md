@@ -25,6 +25,7 @@
     - [vdom（虚拟DOM）](/WebBase/src/16.md)
     - [diff算法](/WebBase/src/17.md)
     - [什么是JS Bridge](/WebBase/src/18.md)
+    - [Vue 生命周期](/WebBase/src/19.md)
 
 
 ### 参考文章
