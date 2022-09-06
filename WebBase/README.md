@@ -36,5 +36,6 @@
   - [prefetch和dns-prefetch分别是什么？](/WebBase/src/26.md)
   - [常见的前端攻击和如何预防？](/WebBase/src/27.md)
   - [从输入URl到网页显示的步骤](/WebBase/src/28.md)
+  - [重绘和重排](/WebBase/src/29.md)
 
 ### 参考文章
