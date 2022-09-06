@@ -40,4 +40,6 @@
   - [koa2的洋葱圈模型](/WebBase/src/31.md)
   - [如何进行首屏优化？](/WebBase/src/32.md)
   - [后端一次性返回 10w 条数据，你该如何渲染？](/WebBase/src/33.md)
+  - [前端常用的设计模式，以及使用场景](/WebBase/src/34.md)
+
 
