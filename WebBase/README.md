@@ -37,5 +37,6 @@
   - [常见的前端攻击和如何预防？](/WebBase/src/27.md)
   - [从输入URl到网页显示的步骤](/WebBase/src/28.md)
   - [重绘和重排](/WebBase/src/29.md)
+  - [如何实现网页多标签tab通讯？](/WebBase/src/30.md)
 
 ### 参考文章
