@@ -43,6 +43,4 @@
   - [前端常用的设计模式，以及使用场景](/WebBase/src/34.md)
   - [手写一个JS函数，实现数组扁平化](/WebBase/src/35.md)
   - [手写一个getType函数，获取详细的数据类型](/WebBase/src/36.md)
-
-
-
+  - [new 一个对象的过程是什么，手写代码表示](/WebBase/src/37.md)
