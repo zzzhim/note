@@ -45,4 +45,4 @@
   - [手写一个getType函数，获取详细的数据类型](/WebBase/src/36.md)
   - [new 一个对象的过程是什么，手写代码表示](/WebBase/src/37.md)
   - [实现一个 sleep 机制](/WebBase/src/38.md)
-
+  - [实现一个柯里化函数](/WebBase/src/39.md)
