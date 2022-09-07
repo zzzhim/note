@@ -5,7 +5,6 @@
  * @LastEditTime: 2019-07-31 21:49:25
  * @LastEditors: Please set LastEditors
  -->
-
 - 前端基础知识笔记
   - [Ajax-Fetch-Axios三者的区别](/WebBase/src/1.md)
   - [防抖和节流](/WebBase/src/2.md)
@@ -38,5 +37,14 @@
   - [从输入URl到网页显示的步骤](/WebBase/src/28.md)
   - [重绘和重排](/WebBase/src/29.md)
   - [如何实现网页多标签tab通讯？](/WebBase/src/30.md)
+  - [koa2的洋葱圈模型](/WebBase/src/31.md)
+  - [如何进行首屏优化？](/WebBase/src/32.md)
+  - [后端一次性返回 10w 条数据，你该如何渲染？](/WebBase/src/33.md)
+  - [前端常用的设计模式，以及使用场景](/WebBase/src/34.md)
+  - [手写一个JS函数，实现数组扁平化](/WebBase/src/35.md)
+  - [手写一个getType函数，获取详细的数据类型](/WebBase/src/36.md)
+  - [new 一个对象的过程是什么，手写代码表示](/WebBase/src/37.md)
+  - [实现一个 sleep 机制](/WebBase/src/38.md)
+  - [实现一个柯里化函数](/WebBase/src/39.md)
 
 ### 参考文章
