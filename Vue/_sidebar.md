@@ -6,4 +6,5 @@
   - [vue 组件更新后如何获取到最新的DOM](/Vue/src/4.md)
   - [vue 动态组件 与 异步组件](/Vue/src/5.md)
   - [缓存组件](/Vue/src/6.md)
+  - [响应式](/Vue/src/7.md)
 
