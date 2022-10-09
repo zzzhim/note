@@ -13,3 +13,4 @@
 - [前端基础知识](/WebBase/)
 - [React 基础知识](/React/)
 - [Vue 基础知识](/Vue/)
+- [基础算法知识](/Algorithm/)
